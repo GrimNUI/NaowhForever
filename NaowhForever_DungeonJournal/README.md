@@ -363,7 +363,10 @@ in the pull request it opens.
   versions, one per faction, either of which counts), `steps` (the rest of its chain, all of which
   must be done for Done), `lead` (a lead-in that only counts while you carry it) and `next`
   (`next[i] = { uiMapID, x, y, where }`, where `steps[i]` is picked up). A step is a quest ID or a
-  table of IDs (one per faction), any of which counts.
+  table of IDs (one per faction), any of which counts. `sides = { A = { where, uiMapID, x, y },
+  H = { ... } }` is for a quest both factions take from different givers: once the player's
+  faction is known (at load, or at PLAYER_LOGIN), its own giver replaces the text naming both
+  and gets the waypoint. Only Tome of Twilight has one so far.
 - The guide is Wowhead's Forever dungeon quest guide (patch 1.60.1, updated 2026-09-23).
   Positions on Stormwind, Mulgore, Redridge and the Eastern Plaguelands are converted to
   Forever's redrawn maps. The new dungeons' quests are by hand. Every dungeon's `levels` are

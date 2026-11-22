@@ -718,6 +718,10 @@ do
         if entry.quest[1] == 6981 then glowing = entry end
     end
     check("The Glowing Shard is listed", glowing ~= nil)
+    local tome, QUEST = J.Quests.ByID(94984), J.C.QUEST
+    check("a quest with a giver per faction shows only the player's own", tome
+        and tome[QUEST.WHERE] == "Riverglades - Ashe Amberhall (66.7, 81)" and tome[QUEST.MAP] == 2548
+        and tome[QUEST.X] == 66.7 and tome[QUEST.Y] == 81.0)
     check("and has a waypoint: the dungeon's entrance", glowing.canWaypoint)
     check("hundreds of bosses", bosses > 150)
     check("the entrances with a source that matches Forever's map", entrances == 35)

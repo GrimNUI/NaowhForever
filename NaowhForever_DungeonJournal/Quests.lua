@@ -192,6 +192,23 @@ local function LinkFollowUps()
 end
 LinkFollowUps()
 
+local sidesApplied = false
+
+local function ApplySides()
+    if sidesApplied then return end
+    local side = FACTION_CODE[UnitFactionGroup("player") or ""]
+    if not side then return end
+    sidesApplied = true
+    for _, dungeon in ipairs(J.QuestData) do
+        for _, quest in ipairs(dungeon.quests) do
+            local own = quest.sides and quest.sides[side]
+            if own then quest[WHERE], quest[MAP], quest[X], quest[Y] = own[1], own[2], own[3], own[4] end
+        end
+    end
+end
+ApplySides()
+ns.OnApply(ApplySides)
+
 local function QuestByID(id)
     if not byID then
         byID = {}

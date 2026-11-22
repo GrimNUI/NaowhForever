@@ -70,6 +70,7 @@ local function Fixture(opts)
         end,
         CanPlaceWaypoint = function() return true end,   -- every map takes one, as PlaceWaypoint says
         GamepadOwnsPanels = function() return opts.gamepad == true end,
+        OnApply = function() end,
         Shared = {},
     }
     local env = setmetatable({
@@ -127,6 +128,17 @@ local plain = { 100, "Plain", 20, "B", true, "" }
 local chain = { 200, "Chain", 20, "B", true, "", steps = { 201, { 202, 203 } } }
 local alt = { 300, "Alt", 20, "B", true, "", alt = { 301 } }
 local lead = { 400, "Lead", 20, "B", true, "", lead = { 401 } }
+
+Case("a quest with a giver per faction takes the player's own giver and spot", function()
+    local sides = { A = { "Alliance giver", 2548, 66.7, 81.0 }, H = { "Horde giver", 2548, 59.4, 44.2 } }
+    local function Shared() return { 500, "Sided", 20, "B", true, "Both givers", sides = sides } end
+    local _, byID = Fixture({ extra = { Shared() } })
+    local q = byID[500]
+    assert(q[6] == "Alliance giver" and q[7] == 2548 and q[8] == 66.7 and q[9] == 81.0, q[6])
+    _, byID = Fixture({ extra = { Shared() }, faction = "Horde" })
+    q = byID[500]
+    assert(q[6] == "Horde giver" and q[8] == 59.4 and q[9] == 44.2, q[6])
+end)
 
 Case("a quest in the log with objectives left is In log", function()
     local Q = Fixture({ on = { 100 } })
@@ -733,8 +745,10 @@ end)
 
 Case("every quest in a generated chain is in its own chain", function()
     local J = {}
-    local ns = { L = dofile("Tools/regression/locale_stub.lua").L, Upper = string.upper, Lower = string.lower, Journal = J }
-    local env = setmetatable({ _G = { NaowhForever = ns }, C_QuestLog = {} }, { __index = _G })
+    local ns = { L = dofile("Tools/regression/locale_stub.lua").L, Upper = string.upper, Lower = string.lower, Journal = J,
+        OnApply = function() end }
+    local env = setmetatable({ _G = { NaowhForever = ns }, C_QuestLog = {},
+        UnitFactionGroup = function() return "Alliance" end }, { __index = _G })
     for _, path in ipairs({ "NaowhForever_DungeonJournal/Data/Quests.lua", "NaowhForever_DungeonJournal/Data/QuestChains.lua",
                             "NaowhForever_DungeonJournal/Constants.lua", "NaowhForever_DungeonJournal/Quests.lua" }) do
         local chunk = assert(loadfile(path))
