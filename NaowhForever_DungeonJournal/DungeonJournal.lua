@@ -42,7 +42,20 @@ local SUBZONES = {
     ["The Furnace"] = "UpperBlackrockSpire",
     ["The Molten Span"] = "UpperBlackrockSpire",
     ["The Rookery"] = "UpperBlackrockSpire",
+    ["Warpwood Quarter"] = "DireMaulEast",
+    ["The Shrine of Eldretharr"] = "DireMaulEast",
+    ["The Hidden Reach"] = "DireMaulEast",
+    ["The Conservatory"] = "DireMaulEast",
+    ["Capital Gardens"] = "DireMaulWest",
+    ["Court of the Highborne"] = "DireMaulWest",
+    ["Prison of Immol'thar"] = "DireMaulWest",
+    ["Gordok Commons"] = "DireMaulNorth",
+    ["Halls of Destruction"] = "DireMaulNorth",
+    ["Gordok's Seat"] = "DireMaulNorth",
 }
+local SPLIT_KEYS = { DireMaul = "DireMaulEast" }
+
+local FloorHere
 
 local TEXT_TURNED_ON = ns.L("Dungeon Journal turned on. Turn it off in its settings page.")
 local TEXT_ENTRANCE = ns.L(" (entrance)")
@@ -359,6 +372,54 @@ function J.Boss(npc)
     if boss then return boss, dungeonOf[boss] end
 end
 
+function FloorHere()
+    local id = C_Map.GetBestMapForUnit("player")
+    local group = id and C_Map.GetMapGroupID and C_Map.GetMapGroupID(id)
+    local members = group and C_Map.GetMapGroupMembersInfo(group)
+    for i = 1, members and #members or 0 do
+        if members[i].mapID == id then return members[i].name end
+    end
+end
+
+local function WingOfEncounters(kills)
+    if type(kills) ~= "table" then return end
+    for _, dungeon in ipairs(ordered) do
+        for _, wing in ipairs(dungeon.wings) do
+            for _, boss in ipairs(wing.bosses) do
+                if boss.encounters and kills[boss.encounters[1]] then return dungeon.key end
+            end
+        end
+    end
+end
+
+local function WingOfBoss(english)
+    for _, dungeon in ipairs(ordered) do
+        for _, wing in ipairs(dungeon.wings) do
+            for _, boss in ipairs(wing.bosses) do
+                if boss.english == english and not boss.trash then return dungeon.key end
+            end
+        end
+    end
+end
+
+local splitMoved = false
+
+local function MoveSplitKeys()
+    if splitMoved then return end
+    splitMoved = true
+    local account = ns.AccountSettings()
+    for _, store in ipairs({ "journalRuns", "journalLoot" }) do
+        for _, list in pairs(type(account[store]) == "table" and account[store] or {}) do
+            for _, record in pairs(type(list) == "table" and list or {}) do
+                local into = type(record) == "table" and SPLIT_KEYS[record.dungeon]
+                if into then
+                    record.dungeon = WingOfEncounters(record.kills) or WingOfBoss(record.boss) or into
+                end
+            end
+        end
+    end
+end
+
 function J.Current()
     local inInstance, kind = IsInInstance()
     if not (inInstance and (kind == "party" or kind == "raid")) then
@@ -370,8 +431,10 @@ function J.Current()
     local list = byMap[id] or byName[name]
     if not list or not list[2] then return list end
     local subzone = GetSubZoneText()
+    local floor = FloorHere()
     local key = WING_MAPS[C_Map.GetBestMapForUnit("player")]
         or SUBZONES[J.Names and J.Names.subzones[subzone] or subzone]
+        or floor and SUBZONES[J.Names and J.Names.subzones[floor] or floor]
         or lastWing[id]
     lastWing[id] = key
     if not key or list[1].key == key then return list end
@@ -462,3 +525,4 @@ function J.TurnOn()
 end
 
 ns.OnApply(SplitOpacity)
+ns.OnApply(MoveSplitKeys)

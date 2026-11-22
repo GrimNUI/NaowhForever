@@ -742,7 +742,7 @@ do
         and tome[QUEST.X] == 66.7 and tome[QUEST.Y] == 81.0)
     check("and has a waypoint: the dungeon's entrance", glowing.canWaypoint)
     check("hundreds of bosses", bosses > 150)
-    check("the entrances with a source that matches Forever's map", entrances == 35)
+    check("the entrances with a source that matches Forever's map", entrances == 37)
     local boss, dungeon = J.Boss(639)
     check("the boss loot window finds a boss by its NPC ID", boss and boss.name == "Edwin VanCleef"
         and dungeon.key == "Deadmines")
@@ -907,7 +907,7 @@ do
     check("a boss takes its Spanish name by its NPC", names.npcs[647] and greenskin.name == names.npcs[647]
         and greenskin.name ~= "Captain Greenskin" and greenskin.english == "Captain Greenskin")
     local tribute
-    for _, wing in ipairs(J.Get("DireMaul").wings) do
+    for _, wing in ipairs(J.Get("DireMaulNorth").wings) do
         for _, boss in ipairs(wing.bosses) do
             if boss.chest == 179564 then tribute = boss end
         end
@@ -2948,7 +2948,7 @@ do
                 check("it starts, takes or is used for a quest: " .. data.name, roles > 0)
             end
         end
-        check("the quest givers and objects of every classic dungeon with one inside", entries == 56 and maps == 17)
+        check("the quest givers and objects of every classic dungeon with one inside", entries == 54 and maps == 18)
 
         local function QuestPins()
             local list = {}
@@ -3209,7 +3209,8 @@ do
             check(name .. ": his pin and the three other spots he can spawn at",
                 spots[name] and spots[name][1] == 4 and spots[name][2] == 3)
         end
-        for _, key in ipairs({ "RazorfenDowns", "Uldaman", "Maraudon", "SunkenTemple", "BlackrockDepths", "DireMaul",
+        for _, key in ipairs({ "RazorfenDowns", "Uldaman", "Maraudon", "SunkenTemple", "BlackrockDepths", "DireMaulEast",
+            "DireMaulWest", "DireMaulNorth",
             "LowerBlackrockSpire", "UpperBlackrockSpire", "Scholomance", "Stratholme", "Dalaran", "ShadowfangKeep",
             "Deadmines" }) do
             local dungeon = J.Get(key)
