@@ -115,6 +115,11 @@ function ViewMixin:DrawBossInfo(boss, dungeon)
         self:Space(PAGE_GAP)
         self:Add("questChips", quests)
     end
+    if self.withLoot and boss.loot and #boss.loot > 0 then
+        local w = self:GetWidth()
+        self:Space(PAGE_GAP)
+        self:Column(0, w, self:DrawLootColumn(boss, boss.loot, false, w, w, self.cursor))
+    end
     local spells = boss.npc and J.Abilities[boss.npc] or EMPTY
     if #spells > 0 then
         self:Space(PAGE_GAP)
@@ -122,7 +127,6 @@ function ViewMixin:DrawBossInfo(boss, dungeon)
     end
     self:Space(PAGE_GAP)
     self.historyTop = self.cursor
-    View.BossPanel.DrawInto(self, boss, dungeon)
     self:Finish()
 end
 
