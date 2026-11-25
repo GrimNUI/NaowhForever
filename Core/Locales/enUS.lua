@@ -9139,6 +9139,7 @@ L["No build picked"] = true
 L["Show or hide this panel."] = true
 L["Nearest Book"] = true
 L["Points a waypoint at the nearest book you still need in your zone, and at the next one once you loot it. Your own waypoints are left alone."] = true
+L["Requires %s with %s"] = true
 L["Level Range"] = true
 L["Only the loot for these required levels; an empty box is no limit."] = true
 L["Loot From Level"] = true
