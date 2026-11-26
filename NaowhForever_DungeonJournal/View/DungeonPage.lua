@@ -293,7 +293,7 @@ function ViewMixin:DrawTrashCards()
     self:Section(TEXT_TRASH, self.trashShown)
     self:Space(SECTION_SPACE)
     for k = 1, #trash do self:Gather(trash[k], nil, self:ShownCount(trash[k])) end
-    self.trashColumns = #trash == 1 and self:GetWidth() >= St.COMPACT_W
+    self.trashColumns = #trash == 1 and (not self.lootDense or self:GetWidth() >= St.COMPACT_W)
     self:DrawGrid(#trash == 1 and 1 or nil)
     self.trashColumns = false
 end

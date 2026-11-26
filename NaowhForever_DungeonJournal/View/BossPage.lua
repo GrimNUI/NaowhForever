@@ -126,7 +126,6 @@ function ViewMixin:DrawBossInfo(boss, dungeon)
         self:DrawAbilityColumn(spells, true, self:GetWidth(), self:GetWidth(), self.cursor)
     end
     self:Space(PAGE_GAP)
-    self.historyTop = self.cursor
     self:Finish()
 end
 

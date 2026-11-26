@@ -75,8 +75,8 @@ local function FaceLevel(boss)
     local text = info and Parts.BossLevel(info)
     if not text then return nil end
     local high = info[2]
-    if text == SKULL_LEVEL or not high or high < 0 then return text, { r = 1, g = 0.1, b = 0.1 } end
-    return text, GetQuestDifficultyColor and GetQuestDifficultyColor(high) or T.fg
+    if text == SKULL_LEVEL or not high or high < 0 then return text, St.SKULL_LEVEL_RGB end
+    return text, GetQuestDifficultyColor(high)
 end
 
 local function PaintFace(face)
@@ -162,7 +162,7 @@ local function DrawStrip()
         face:ClearAllPoints()
         local col, row = (i - 1) % cols, math.floor((i - 1) / cols)
         face:SetPoint("TOPLEFT", col * (box + FACE_GAP), -row * rowH)
-        local hasArt = boss.model ~= nil and SetPortraitTextureFromCreatureDisplayID ~= nil
+        local hasArt = boss.model ~= nil
         if hasArt then SetPortraitTextureFromCreatureDisplayID(face.art, boss.model) end
         face.art:SetShown(hasArt)
         face.number:SetText(hasArt and "" or tostring(i))
@@ -277,16 +277,6 @@ function ShowBoss(boss, scrollTo)
     end
 end
 
-local ShowMode
-
-local function ShowHistory(boss)
-    picked = boss
-    mode = MAP
-    ShowMode()
-    infoScroll:SetVerticalScroll(math.min(infoView.historyTop,
-        math.max(0, infoView:GetHeight() - infoScroll:GetHeight())))
-end
-
 local function PinPicked(boss)
     ShowBoss(boss ~= picked and boss or nil, true)
 end
@@ -345,7 +335,7 @@ local function ShowMap(shown)
     end
 end
 
-function ShowMode()
+local function ShowMode()
     Parts.PaintTabs(tabs, mode)
     ShowMap(mode == MAP)
     sideScroll:SetShown(mode ~= MAP)
@@ -405,7 +395,7 @@ local function BuildViews()
     backButton.text = ns.Font(backButton, BACK_SIZE, nil, T.accent)
     backButton.text:SetPoint("LEFT")
     backButton.text:SetText(TEXT_ALL_BOSSES)
-    backButton:SetWidth(math.ceil(backButton.text:GetStringWidth()) + 4)
+    backButton:SetWidth(math.ceil(backButton.text:GetStringWidth()) + St.BACK_TEXT_PAD)
     backButton:SetScript("OnEnter", function(b) b.text:SetTextColor(T.fg.r, T.fg.g, T.fg.b) end)
     backButton:SetScript("OnLeave", function(b) b.text:SetTextColor(T.accent.r, T.accent.g, T.accent.b) end)
     backButton:SetScript("OnClick", function() ShowBoss(nil, true) end)
@@ -503,8 +493,6 @@ end
 function Pane.Pick(boss)
     ShowBoss(boss, true)
 end
-
-Pane.History = ShowHistory
 
 function Pane.Redraw()
     if not (frame and frame:IsShown() and dungeon) then return end
