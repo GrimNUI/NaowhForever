@@ -1,10 +1,56 @@
 # Changelog
 
-## Unreleased
+## 1.4.12
+
+### Added
+- Blessings: Player List Side, on the Blessings settings page, opens the class player list above,
+  below, left or right of the bar.
+- Dungeon Journal: Blackmaw Hold's map shows its bosses, the Moontouched Wanderer, The Twin Bears'
+  totems and the stairs between its levels.
+- Dungeon Journal: quest pins for the Ghostly Attendant (An Ancient Grudge, Hall of Thanes) and The
+  Book of Ur (Shadowfang Keep).
+- Dungeon Journal: Dark Iron Legacy has a tip: die in the lava by the great chain and talk to
+  Franclorn Forgewright as a ghost.
+- Dungeon Journal > Quest Tracker: Only My Quests at Max Level lists only the dungeon quests in your
+  log once you are max level.
+- RestedXP: the Naowh window says in chat why it can't show when RestedXP's V2 interface is off or
+  RestedXP changed.
+- Racial and Class Tracking: Hide Text shows the reminder icons without their Track text.
+- RestedXP: macros, spells and items in the Active Items window can be dragged onto an action bar by
+  holding Shift.
+- Professions: Buy Vendor Items Automatically (off by default, needs Vendor Items on Shopping List)
+  buys your Shopping List's vendor materials as soon as you open a merchant that sells them. Hold
+  Shift as you open the merchant to skip it for that visit.
 
 ### Changed
 - Dungeon Journal: its data is updated to WoW Forever build 1.60.1.71139.
 - Dungeon Journal: boss loot updated from the latest Forever loot lists.
+- Dungeon Journal: the Dungeon Quests title shows the quests you have handed in out of all of them
+  there, e.g. 3/7.
+- Dungeon Journal > Quest Tracker: Skip at Max Level is now called Hide at Max Level.
+- RestedXP: the logo in the Naowh window follows RestedXP's theme.
+
+### Fixed
+- Discovery: the tab names are no longer cut short; the page switches and the search box sit on
+  their own row under the tabs.
+- Blessings: the class player list no longer opens behind unit frames near the Blessing Bar.
+- Group Finder Roles: rows that do not match your role picks no longer reappear in the Group Finder.
+- BiS List: spec rankings and pre-raid picks no longer offer class quest rewards your class cannot
+  take, such as Forest's Embrace for Shamans.
+- Quest List: holding Shift over a quest giver shows the right XP for quests far below your level
+  (half, as Forever gives, not a tenth).
+- Dungeon Journal: map spots moved from players' reports: Shadowfang Keep's Commander Springvale,
+  Baron Silverlaine, Fel Steed, Arugal's Voidwalker and Archmage Arugal, Gnomeregan's Sparklematic
+  5200 and Kernobee, and the Scarlet Monastery Library's entrance.
+- Dungeon Journal: A Taste of Flame lists its whole chain from Divine Retribution, and The Test of
+  Righteousness starts with The Tome of Valor (1649 and 1650).
+- Quest List: Season of Discovery quests that Forever does not offer are no longer listed.
+- BiS List: the Auto list no longer picks a leveling item from a class quest your class cannot take,
+  such as Furen's Armor's chest for Protection Paladins.
+- Buff Reminders: profession cooldown reminders name the character with their surname, not their
+  first name alone.
+- RestedXP: links in a step, like video guides, open when clicked in the Naowh window.
+- BiS List: Hunters are no longer offered thrown weapons as ranged-slot upgrades.
 
 ## 1.4.11
 
