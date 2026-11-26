@@ -1028,6 +1028,7 @@ function Draw()
     DrawChrome(y, listH, folded)
     local guide = Dig(_G.RXPV2GuideWindow, "frame")
     window:SetShown(not guide or guide:IsShown())
+    if not sizing then ns.RXPItemsStart() end
 end
 
 local function Tell()
@@ -1074,6 +1075,10 @@ end
 
 function ns.RXPWindowReady()
     return ns.RXPWindowWhy() == nil
+end
+
+function ns.RXPWindowActive()
+    return active == true
 end
 
 function ns.RXPWindowStart()
