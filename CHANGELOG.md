@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+- Dungeon Journal: its data is updated to WoW Forever build 1.60.1.71139.
+- Dungeon Journal: boss loot updated from the latest Forever loot lists.
+
 ## 1.4.11
 
 ### Added
