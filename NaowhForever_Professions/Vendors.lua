@@ -14,18 +14,26 @@ local SPOT_NAME, SPOT_MAP, SPOT_X, SPOT_Y, SPOT_SIDE = 1, 2, 3, 4, 5
 local TOWN_X, TOWN_Y, TOWN_NAME, TOWN_SIDE = 1, 2, 4, 7
 local TEXT_TOO_DEAR = ns.L("Buy at Vendor: that costs %s, more than you have.")
 local TEXT_BOUGHT = ns.L("Bought %s for %s.")
+local TEXT_AUTO_TOO_DEAR = ns.L("Buy Vendor Items Automatically: %s is more than %s, so buy it with Buy All.")
 local TEXT_NO_VENDOR = ns.L("Visit a vendor that sells this item to remember its location.")
 local TEXT_PART = "%dx %s"
 local MERCHANT_EVENTS = { "MERCHANT_SHOW", "MERCHANT_UPDATE", "MERCHANT_CLOSED" }
 local MERCHANT_KEYS = { enabled = true, shoppingList = true, shoppingVendor = true, vendorMaterials = true,
     craftProfit = true, buyVendor = true }
 local WAIT_EVENTS = { "BAG_UPDATE_DELAYED", "UI_ERROR_MESSAGE" }
+local REFUSALS = { "ERR_INV_FULL", "ERR_BAG_FULL", "ERR_ITEM_MAX_COUNT", "ERR_NOT_ENOUGH_MONEY" }
+local CLOSE_SETTLE = 5
+local ERROR_SETTLE = 2
 
 local merchant
 local shoppingList, shoppingPool, buyList, buyPool, buyParts = {}, {}, {}, {}, {}
 local expected, counted = {}, {}
 local townSpots
 local waiting = false
+local autoArmed = false
+local closings, errorChecks = 0, 0
+local errorPending = false
+local AutoBuy, Open
 
 local function LearnedVendorItems()
     local account = ns.AccountSettings()
@@ -165,6 +173,10 @@ local function ShoppingOn()
     return S.Get("shoppingList") and S.Get("shoppingVendor")
 end
 
+local function AutoOn()
+    return ShoppingOn() and S.Get("shoppingVendorAuto")
+end
+
 local function ScanMerchant()
     local shopping = ShoppingOn()
     local learn, price = S.Get("vendorMaterials") or shopping, S.Get("craftProfit") or shopping
@@ -186,7 +198,7 @@ end
 
 local function StopWaiting()
     wipe(expected)
-    waiting = false
+    waiting, errorPending = false, false
     if merchant then
         for _, event in ipairs(WAIT_EVENTS) do merchant:UnregisterEvent(event) end
     end
@@ -200,38 +212,99 @@ local function Expect(itemID, count)
 end
 
 local function Settle()
+    local landed = false
     for itemID, left in pairs(expected) do
         local now = R.ItemCount(itemID)
         local got = math.min(left, now - counted[itemID])
         if got > 0 then
+            landed = true
             counted[itemID] = now
             expected[itemID] = left > got and left - got or nil
             P.Shopping.Bought(itemID, got)
         end
     end
     if next(expected) == nil then StopWaiting() end
+    return landed
 end
 
-local function OnMerchantEvent(_, event)
-    if event == "BAG_UPDATE_DELAYED" then
-        Settle()
-        return P.Shopping.Redraw()
+local function SettleAfterClose()
+    Settle()
+    if next(expected) == nil then return end
+    closings = closings + 1
+    local closing = closings
+    C_Timer.After(CLOSE_SETTLE, function()
+        if closing == closings and not Open() then StopWaiting() end
+    end)
+end
+
+local function Refused(message)
+    if message == nil then return false end
+    for _, name in ipairs(REFUSALS) do
+        if message == _G[name] then return true end
     end
-    if event == "UI_ERROR_MESSAGE" then
-        waiting = false
-        merchant:UnregisterEvent(event)
-        return P.ShoppingVendorView.OnMerchantEvent(event)
+    return false
+end
+
+local function EndWait()
+    waiting, errorPending = false, false
+    if merchant then merchant:UnregisterEvent("UI_ERROR_MESSAGE") end
+    P.ShoppingVendorView.OnMerchantEvent("UI_ERROR_MESSAGE")
+end
+
+local function CountDownError()
+    errorChecks = errorChecks + 1
+    local check = errorChecks
+    C_Timer.After(ERROR_SETTLE, function()
+        if check == errorChecks and waiting then EndWait() end
+    end)
+end
+
+local function OnUIError(message)
+    if Refused(message) then return EndWait() end
+    if not waiting then return end
+    errorPending = true
+    CountDownError()
+end
+
+local function MerchantLoaded()
+    local n = GetMerchantNumItems()
+    if n == 0 then return false end
+    for i = 1, n do
+        if not GetMerchantItemID(i) then return false end
     end
+    return true
+end
+
+local function TryAutoBuy()
+    AutoBuy()
+    if autoArmed and not waiting and MerchantLoaded() then autoArmed = false end
+end
+
+local function MerchantChanged(event, replay)
     if event == "MERCHANT_CLOSED" then
-        Settle()
-        StopWaiting()
+        autoArmed = false
+        SettleAfterClose()
     else
         ScanMerchant()
+        if event == "MERCHANT_SHOW" and not replay then
+            autoArmed = AutoOn() and not IsShiftKeyDown() and true or false
+        end
     end
     if event ~= "MERCHANT_UPDATE" and S.Get("buyVendor") and ns.ProfWindowRefresh then ns.ProfWindowRefresh() end
     if not ShoppingOn() then return end
+    TryAutoBuy()
     P.Shopping.Redraw()
     P.ShoppingVendorView.OnMerchantEvent(event)
+end
+
+local function OnMerchantEvent(_, event, _, message)
+    if event == "BAG_UPDATE_DELAYED" then
+        if Settle() and errorPending and waiting then CountDownError() end
+        TryAutoBuy()
+        return P.Shopping.Redraw()
+    end
+    if event == "UI_ERROR_MESSAGE" then return OnUIError(message) end
+    MerchantChanged(event, false)
 end
 
 local function CraftableWithVendor(info)
@@ -245,7 +318,7 @@ local function CraftableWithVendor(info)
     return n
 end
 
-local function Open()
+function Open()
     local frame = _G.MerchantFrame
     return frame ~= nil and frame:IsShown()
 end
@@ -262,21 +335,30 @@ local function Find(itemID)
     end
 end
 
-local function ShoppingNeeds(onlyItem)
+local function Uncounted(itemID)
+    local credited = P.Shopping.Have()[itemID] or 0
+    for _, craft in pairs(P.Shopping.List()) do
+        credited = credited + (craft.got and craft.got[itemID] or 0)
+    end
+    return math.max(0, R.ItemCount(itemID) - credited)
+end
+
+local function ShoppingNeeds(onlyItem, lessOwned)
     local n, total = 0, 0
     for _, material in ipairs(P.Shopping.VendorMaterials()) do
         if not onlyItem or material.item == onlyItem then
             local index, price, stack, available = Find(material.item)
-            if index then
-                local buys = math.ceil(material.qty / stack)
+            local want = index and material.qty - (lessOwned and Uncounted(material.item) or 0)
+            if want and want > 0 then
+                local buys = math.ceil(want / stack)
                 if available >= 0 then buys = math.min(buys, available) end
                 if buys > 0 then
                     n = n + 1
                     local entry = shoppingPool[n] or {}
                     shoppingPool[n] = entry
                     entry.index, entry.itemID = index, material.item
-                    entry.want, entry.count = material.qty, buys * stack
-                    entry.cost, entry.short = buys * price, available >= 0 and buys * stack < material.qty
+                    entry.want, entry.count = want, buys * stack
+                    entry.cost, entry.short = buys * price, available >= 0 and buys * stack < want
                     shoppingList[n] = entry
                     total = total + entry.cost
                 end
@@ -362,6 +444,17 @@ local function Waiting()
     return waiting
 end
 
+function AutoBuy()
+    if not (autoArmed and AutoOn()) or waiting then return end
+    local list, total = ShoppingNeeds(nil, true)
+    if #list == 0 then return end
+    autoArmed = false
+    if total >= MERCHANT_HIGH_PRICE_COST then
+        return ns.Print(TEXT_AUTO_TOO_DEAR:format(Text.Money(total), Text.Money(MERCHANT_HIGH_PRICE_COST)))
+    end
+    BuyEntries(list, total, true)
+end
+
 P.Vendors = {
     IsVendorItem = IsVendorItem,
     MerchantInfo = MerchantInfo,
@@ -388,6 +481,7 @@ end
 local function Apply()
     if not (P.On() and ShoppingOn()) then
         StopWaiting()
+        autoArmed = false
         if P.ShoppingVendorView then P.ShoppingVendorView.Hide() end
     end
     if not MerchantWanted() then
@@ -399,7 +493,7 @@ local function Apply()
         merchant:SetScript("OnEvent", OnMerchantEvent)
     end
     for _, event in ipairs(MERCHANT_EVENTS) do merchant:RegisterEvent(event) end
-    if Open() then OnMerchantEvent(merchant, "MERCHANT_SHOW") end
+    if Open() then MerchantChanged("MERCHANT_SHOW", true) end
 end
 
 local function OnSettingChanged(key)

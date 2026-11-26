@@ -635,9 +635,47 @@ Each layer uses only the ones above it, or reads a later one's table at call tim
   Prices and Buy All at the auction house. A vendor item with no price, built-in or seen, stays on
   the vendor side.
 - When an open merchant sells a vendor-routed Shopping List material, a compact window appears beside it.
-  It is built only while the setting is on and a matching merchant is open. Buying remains click-driven;
-  merchant stack sizes and limited stock are respected, and the close button dismisses it until another
-  merchant opens.
+  It is built only while the setting is on and a matching merchant is open. Buying is click-driven unless
+  Buy Vendor Items Automatically is on; merchant stack sizes and limited stock are respected, and the
+  close button dismisses it until another merchant opens.
+- Buy Vendor Items Automatically (`shoppingVendorAuto`) is off by default. It needs Vendor Items on
+  Shopping List and registers nothing of its own.
+- A real `MERCHANT_SHOW` arms it. The first time that merchant sells something on Buy from Vendor, it buys
+  it as Buy All would. The visit is then spent, whatever the result.
+- Holding Shift as the merchant opens leaves it unarmed for that visit. It spends gold on its own, so
+  there is a way to open a merchant without it. Shift is read once, at `MERCHANT_SHOW`, so letting go
+  later does not arm it.
+- So a refusal (gold for all of it, full bags) is printed once, not on every `MERCHANT_UPDATE`.
+- It buys only on opening. Once the merchant's items have loaded (every `GetMerchantItemID` answers)
+  and nothing bought is on its way, the visit is spent, even when there was nothing to buy. A craft
+  queued later in the visit then waits for the next one, instead of being bought on whatever
+  `MERCHANT_UPDATE` comes next (selling junk, buyback). A merchant whose items have not loaded stays
+  armed for the update that brings them.
+- A total at or above the game's `MERCHANT_HIGH_PRICE_COST` (150 gold, defined in Forever's
+  `MerchantFrame.lua`) is left to Buy All. The game's own merchant asks to confirm from that amount on,
+  so it compares with `>=` too. It says so once in chat.
+- Apply replays `MERCHANT_SHOW` for a merchant already open, with `replay` set, and that never arms it.
+  So changing a setting beside a merchant buys nothing. Turning Vendor Items on Shopping List off spends
+  the visit.
+- It does not ask whether `MerchantFrame` is shown, as QoL's Restock (`NaowhForever_QoL/Loot/Restock.lua`)
+  does not. `MERCHANT_SHOW` can reach this frame before the game's. That check skipped the buy in game
+  whenever no `MERCHANT_UPDATE` followed.
+- Nobody sees the list before it buys, so it takes off what you carry that the list has not counted yet.
+  That is your bags (`R.ItemCount`) less what the list bought (`profShopHave`) and less what the Crafting
+  Queue took from your bags (each craft's `got`). Both are already off the list's need, so taking off all
+  you carry would count them twice and never buy the rest. The bank does not count: a craft needs it in
+  your bags. Buy and Buy All still buy what the list shows.
+- A merchant closed right after buying (Esc) keeps counting the purchase for `CLOSE_SETTLE` seconds.
+  Otherwise it would never reach the list, and the next merchant would buy it again. A merchant opened
+  again in that time waits for it to land, then buys what is still missing.
+- A refusal clears the wait at once: `ERR_INV_FULL`, `ERR_BAG_FULL`, `ERR_ITEM_MAX_COUNT` or
+  `ERR_NOT_ENOUGH_MONEY` (`REFUSALS`). Any other UI error starts an `ERROR_SETTLE` countdown, and the
+  wait ends when nothing lands before it runs out. A spell's error while a purchase lands used to clear
+  it at once, and Buy All could then buy the rest a second time.
+- While such an error is outstanding (`errorPending`), each landing restarts the countdown. It does not
+  cancel it. A Buy All of two items, where one lands and the other failed with an error not in
+  `REFUSALS` (unique, reputation, sold out), still ends the wait, so Buy and Buy All never stay greyed
+  out for the visit. `EndWait` keeps `expected`, so an item that lands later still counts.
 - A vendor material's pin uses the shared waypoint system. Its built-in seller index is generated from
   Wowhead Classic's unlimited-stock inventories and matched to the Forever-adjusted NPC positions already
   in `Shared/Game/Towns.lua`; it has no runtime addon dependency. Merchant visits add to that

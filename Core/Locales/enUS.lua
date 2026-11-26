@@ -9081,6 +9081,9 @@ L["Picker Side"] = true
 L["Which side of the slot the right-click picker opens on."] = true
 L["    Shift-click: link"] = true
 L["Only quests in your quest log can be linked."] = true
+L["Buy Vendor Items Automatically"] = true
+L["Needs Vendor Items on Shopping List"] = true
+L["Buys your Shopping List's vendor materials as soon as you open a merchant."] = true
 L["Bag Clean-up"] = true
 L["The everyday bag settings in one place; the cards below have every detail."] = true
 L["At Vendors and the Bank"] = true
@@ -9149,6 +9152,7 @@ L["Lights this build's next talent without following it, so no points are spent 
 L["%s (followed)"] = true
 L["No build picked"] = true
 L["Show or hide this panel."] = true
+L["Buy Vendor Items Automatically: %s is more than %s, so buy it with Buy All."] = true
 L["Nearest Book"] = true
 L["Points a waypoint at the nearest book you still need in your zone, and at the next one once you loot it. Your own waypoints are left alone."] = true
 L["Tier 0.5"] = true
