@@ -53,7 +53,12 @@ local SUBZONES = {
     ["Halls of Destruction"] = "DireMaulNorth",
     ["Gordok's Seat"] = "DireMaulNorth",
 }
-local SPLIT_KEYS = { DireMaul = "DireMaulEast" }
+local SPLITS = { DireMaul = { english = "Dire Maul", into = { "DireMaulEast", "DireMaulWest", "DireMaulNorth" } } }
+local SPLIT_DONE_KEY = "journalSplitDone"
+local RECORD_STORES = { "journalRuns", "journalLoot" }
+local TRASH_KEY, PINS_KEY, BIS_KEY = "journalTrash", "journalMapPins", "bisLists"
+local ENTRANCE_KEY = "entrance"
+local MOVED_WING = 1
 
 local FloorHere
 
@@ -402,20 +407,84 @@ local function WingOfBoss(english)
     end
 end
 
-local splitMoved = false
+local function Tables(t)
+    return type(t) == "table" and t or EMPTY
+end
 
-local function MoveSplitKeys()
-    if splitMoved then return end
-    splitMoved = true
-    local account = ns.AccountSettings()
-    for _, store in ipairs({ "journalRuns", "journalLoot" }) do
-        for _, list in pairs(type(account[store]) == "table" and account[store] or {}) do
-            for _, record in pairs(type(list) == "table" and list or {}) do
-                local into = type(record) == "table" and SPLIT_KEYS[record.dungeon]
-                if into then
-                    record.dungeon = WingOfEncounters(record.kills) or WingOfBoss(record.boss) or into
+local function MoveRecords(account, old, into)
+    local totals = type(account[TRASH_KEY]) == "table" and account[TRASH_KEY] or nil
+    for _, store in ipairs(RECORD_STORES) do
+        for _, list in pairs(Tables(account[store])) do
+            for _, record in pairs(Tables(list)) do
+                if type(record) == "table" and record.dungeon == old then
+                    local wing = type(record.wing) == "number" and into[record.wing]
+                    record.dungeon = WingOfEncounters(record.kills) or WingOfBoss(record.boss) or wing or into[1]
+                    if record.wing then record.wing = MOVED_WING end
+                    local trash = record.done and tonumber(record.trash)
+                    if totals and trash and trash > (totals[record.dungeon] or 0) then totals[record.dungeon] = trash end
                 end
             end
+        end
+    end
+    if totals then totals[old] = nil end
+end
+
+local function MovePins(account, old, into)
+    local all = account[PINS_KEY]
+    local placed = type(all) == "table" and all[old]
+    if type(placed) ~= "table" then return end
+    for key, spot in pairs(placed) do
+        for _, wingKey in ipairs(into) do
+            local map = J.Maps[wingKey]
+            if map and (map.pins[key] or key == ENTRANCE_KEY and map.entrance) then
+                all[wingKey] = all[wingKey] or {}
+                if all[wingKey][key] == nil then all[wingKey][key] = spot end
+            end
+        end
+    end
+    all[old] = nil
+end
+
+local function Rerouted(route, old, names)
+    if type(route) ~= "table" then return route end
+    local out, seen = {}, {}
+    for _, name in ipairs(route) do
+        if name == old then
+            for _, wingName in ipairs(names) do
+                if not seen[wingName] then out[#out + 1], seen[wingName] = wingName, true end
+            end
+        elseif not seen[name] then
+            out[#out + 1], seen[name] = name, true
+        end
+    end
+    return out
+end
+
+local function MoveRoutes(account, old, names)
+    for _, store in pairs(Tables(account[BIS_KEY])) do
+        for _, list in pairs(Tables(type(store) == "table" and store.lists)) do
+            if type(list) == "table" then
+                list.route = Rerouted(list.route, old, names)
+                for _, parked in pairs(Tables(list.bySpec)) do
+                    if type(parked) == "table" then parked.route = Rerouted(parked.route, old, names) end
+                end
+            end
+        end
+    end
+end
+
+local function MoveSplitKeys()
+    local account = ns.AccountSettings()
+    local done = type(account[SPLIT_DONE_KEY]) == "table" and account[SPLIT_DONE_KEY] or {}
+    account[SPLIT_DONE_KEY] = done
+    for old, split in pairs(SPLITS) do
+        if not done[old] then
+            local names = {}
+            for i, key in ipairs(split.into) do names[i] = byKey[key] and byKey[key].english or key end
+            MoveRecords(account, old, split.into)
+            MovePins(account, old, split.into)
+            MoveRoutes(account, split.english, names)
+            done[old] = true
         end
     end
 end

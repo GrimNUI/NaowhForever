@@ -726,8 +726,13 @@ in the pull request it opens.
   the game's Group Finder and players treat them: each has its own entrance in Feralas, bosses,
   quests and lockout line. They share one instance and one map picture, so `Data/Maps.lua` builds
   each wing's map from the whole one (North floor 1, West 2 to 4, East 5 and 6) with the pins and
-  quest givers on its floors; givers with no pin go to West. Runs and loot saved under the old
-  `DireMaul` key move at login to the wing their kills (by encounter) or boss belong to, else East.
+  quest givers on its floors; givers with no pin go to West. What was saved under the old
+  `DireMaul` key moves once per account (`journalSplitDone`): runs and loot to the wing their kills
+  (by encounter) or boss belong to, else the run's old wing number, else East, and as each new
+  dungeon has one wing a moved run's `wing` becomes 1 so it counts for best times; trash totals
+  from the moved finished runs, as the old total covered every wing; map pins the player moved to
+  each wing whose map has that pin or the entrance; and a BiS route's Dire Maul step to the three
+  wings in its place, East, West, North, as each is now a place of its own.
   The Crescent Key opens doors in West and North, so it is listed on both.
 - Factions here walk the map up to its zone: a cave's or a town's map counts as its zone's. In
   a battleground only your side's factions count.

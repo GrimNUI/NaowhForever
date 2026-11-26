@@ -4,8 +4,13 @@ local ns = _G.NaowhForever
 ns.Journal.AddDungeon("DireMaulEast", {
     name = "Dire Maul - East",
     instance = 429,
+    listedAs = { "Dire Maul - Warpwood Quarter" },
     zone = "Feralas", area = 357, territory = "Contested",
-    entrance = { map = 1444, x = 64.8, y = 29.5 },
+    entrance = { map = 1444, x = 64.9, y = 29.4 },
+    doors = {
+        { name = "Front Door", map = 1444, x = 64.9, y = 29.4 },
+        { name = "Back Door", map = 1444, x = 76.5, y = 35.9 },
+    },
     wings = {
         { bosses = {
             { npc = 14354, name = "Pusillin", model = 7552, encounters = { 2792 }, loot = { 18316, 18320, 18303, 18304, 18267 } },

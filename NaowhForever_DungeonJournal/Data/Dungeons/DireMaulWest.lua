@@ -4,8 +4,9 @@ local ns = _G.NaowhForever
 ns.Journal.AddDungeon("DireMaulWest", {
     name = "Dire Maul - West",
     instance = 429,
+    listedAs = { "Dire Maul - Capital Gardens" },
     zone = "Feralas", area = 357, territory = "Contested",
-    entrance = { map = 1444, x = 60.4, y = 30.2 },
+    entrance = { map = 1444, x = 60.3, y = 30.7 },
     wings = {
         { bosses = {
             { npc = 11489, name = "Tendris Warpwood", model = 14383, encounters = { 350 }, loot = { 18390, 18352, 18353, 18393, 273120 }, chance = { 24, 24, 24, 24, 0 } },

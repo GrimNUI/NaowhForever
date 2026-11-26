@@ -4,8 +4,10 @@ local ns = _G.NaowhForever
 ns.Journal.AddDungeon("DireMaulNorth", {
     name = "Dire Maul - North",
     instance = 429,
+    listedAs = { "Dire Maul - Gordok Commons" },
+    listsInstance = true,
     zone = "Feralas", area = 357, territory = "Contested",
-    entrance = { map = 1444, x = 62.5, y = 24.9 },
+    entrance = { map = 1444, x = 62.9, y = 24.9 },
     wings = {
         { bosses = {
             { npc = 14326, name = "Guard Mol'dar", model = 11561, encounters = { 362 }, loot = { 18458, 18451, 18463, 18493, 18494, 18459, 18460, 18450, 18496, 18498, 18462, 18497, 18464 }, chance = { 14, 9, 9, 8, 8, 8, 8, 7, 6, 6, 6, 5, 4 } },
