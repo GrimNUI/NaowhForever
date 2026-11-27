@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.5.0
 
 ### Roll Bars
 
@@ -17,6 +17,15 @@ Roll Bars restyles the game's own Need, Greed and Pass popups. Turn it on on the
 - Test Rolls shows three sample rolls where yours will appear; move them in the HUD Editor.
 - Turn Off EllesmereUI's Popup Skin, for players who use both.
 - It replaces the Loot Rolls window.
+
+### Added
+- BiS List: a PvP Gear setting (Settings, Lists card). Turn it off to leave PvP rank, battleground
+  and PvP vendor gear out of the picker, Pre-raid BiS and generated lists.
+
+### Changed
+- BiS, Market and Professions: item tooltips show the comparison with your equipped item only while
+  you hold Shift, like the Dungeon Journal.
+- Settings previews stay on screen while you scroll through their card's settings.
 
 ## 1.4.12
 
