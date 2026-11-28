@@ -1,6 +1,58 @@
 # Changelog
 
-## Unreleased
+## 1.5.1
+
+### Added
+- Market Farm: click a herb, vein or skinning camp on the zone's map to loop only the spots that
+  give its item; click it again to loop everything.
+- The Market: the Buy tab's Upgrades view sorts by required level as well as by gain; click Level or
+  Gain beside its price box. Each row shows the piece's required level.
+- Map & Pins: PvP Quests, turn it off to keep Warsong Gulch, Arathi Basin and Alterac Valley quest
+  givers off the map and minimap.
+- Loot Rolls is back: a small window of the group's rolls showing who picked Need, Greed or Pass,
+  their roll and who won. Turn it on on the Loot & Items page.
+- Buff Reminders: profession cooldown tooltips show hours and minutes left, like "3h 30m".
+
+### Changed
+- Roll Bars shows the item tooltip when you hover the item name as well as the icon.
+- The Market: with the Gamepad interface style on, The Market window, tooltip prices, Record Gold
+  and watch alerts now work; only the parts on Blizzard's auction house, bag and mail windows stay
+  off.
+- Dungeon Journal: the Run Panel is now on by default. Turn it off in /nf, Dungeon Journal, Journal,
+  Run Panel.
+- Professions: with the Forever skin, the window wears the game's frame and art, with the
+  profession's name on the title bar and its card behind the recipe.
+- Professions: with the Forever skin, skill bars on the window and the overview are the game's, with
+  each profession's moving fill and gryphons or wyverns.
+- Professions: with the Forever skin, the recipe list, search box, number boxes and scroll bar use
+  the game's art.
+- Professions: with the Forever skin, the difficulty line (Skill-up Thresholds) is the game's stat
+  bar, with the numbers on top and an arrow at your skill.
+- Professions: the overview stays Naowh's in combat; its spell buttons work again once combat ends.
+
+### Fixed
+- Quest List: opening the world map in a dungeon no longer stutters reading your quests when no
+  quest giver stands on that map.
+- Journeys no longer sends walks from Orgrimmar's west road out the west gate and round to the main
+  gate.
+- Journeys: no error when combat starts just as a walk is being planned.
+- Talent Builds, the Consumable Bar editor and BiS section headings no longer overlap when button or
+  heading text is long, as in Russian.
+- Journeys walks no longer go the long way round rocky ground that you can walk over, and Eastern
+  Kingdoms walks between the Wetlands and Loch Modan go through Dun Algaz.
+- Buff Reminders: the Weapon Enhancement Reminder offers sharpening stones only for sharp weapons
+  and weightstones only for blunt ones, so a fist weapon or mace no longer gets a stone it can't
+  take.
+- Flight Timer: Mount Hyjal flights show the right time instead of running about 65% long.
+- Flight Timer: a saved flight time far shorter than the real flight is no longer used.
+- Buff Reminders: Profession Cooldown Reminders no longer say Mooncloth or a transmute is ready
+  while it is still on cooldown. Open the profession once to pick up a cooldown used before the
+  update.
+- Blessings: the window opens again with a PallyPower paladin in your group, or another paladin's
+  row you may not change, instead of erroring with its grid half drawn.
+- Professions: the window no longer jumps when you start dragging it.
+- Professions: if combat starts just as the overview is open, the game's overview shows instead of
+  an invisible window that blocks clicks until combat ends.
 
 ## 1.5.0
 
